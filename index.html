@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Pour toi</title>
+<meta name="description" content="Un petit cadeau pour toi.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#fbf6ef">
+
+<!-- =====================================================================
+     POUR MODIFIER FACILEMENT :
+     - Le prénom attendu, le mot de passe, la date de début et le texte
+       de la lettre se changent tout en haut de script.js (section "A MODIFIER").
+     - Les couleurs et les polices sont dans style.css, tout en haut (:root).
+     - Les photos sont dans assets/images/, la musique dans assets/music/song.mp3
+       (remplace juste ce fichier par un autre pour changer la musique).
+     ===================================================================== -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@300;400;500;600&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+
+<!-- Leaflet : pour la vraie carte (nécessite internet une fois le site en ligne) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="pre-gate">
+
+<!-- petit coeur qui suit le doigt/curseur, discret -->
+<div id="cursor-trail" aria-hidden="true"></div>
+
+<!-- musique de fond, une seule piste, en boucle du debut a la fin -->
+<audio id="bg-music" src="assets/music/song.mp3" loop preload="auto"></audio>
+
+<!-- conteneur principal : sur PC, ce conteneur prend la forme d'un cadre
+     de telephone (voir style.css, media query min-width:760px) -->
+<div id="app-frame">
+
+<!-- bouton son, toujours visible discretement une fois la musique lancee -->
+<button id="mute-btn" class="mute-btn" aria-label="Couper le son" hidden>
+  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path id="mute-wave" d="M16 8a5 5 0 010 8" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+</button>
+
+<!-- bouton retour discret, visible dans les cadeaux ouverts -->
+<button id="back-btn" class="back-btn" hidden aria-label="Retour aux cadeaux">
+  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <span>cadeaux</span>
+</button>
+
+<!-- ===================================================================
+     ECRAN 1 : LA GRILLE (verification du prenom)
+     =================================================================== -->
+<section id="screen-gate" class="screen active">
+
+  <div id="gate-step-lock" class="gate-step gate-step-active">
+    <p class="gate-lock-icon">✦</p>
+    <p class="serif gate-line">Ce site est réservé<br>à une seule personne.</p>
+    <button id="gate-continue" class="ghost-btn">Continuer</button>
+  </div>
+
+  <div id="gate-step-name" class="gate-step">
+    <p class="eyebrow center">avant d'entrer</p>
+    <p class="serif gate-line">Quel est ton prénom&nbsp;?</p>
+    <div class="gate-input-row">
+      <input id="gate-name-input" type="text" autocomplete="off" spellcheck="false" placeholder="ton prénom" maxlength="30">
+      <button id="gate-name-submit" class="ghost-btn">Entrer</button>
+    </div>
+    <p id="gate-retry-msg" class="gate-retry"></p>
+  </div>
+
+  <div id="gate-step-check" class="gate-step">
+    <p class="checking-dots"><span></span><span></span><span></span></p>
+    <p class="serif gate-line">Vérification&hellip;</p>
+  </div>
+
+  <div id="gate-step-welcome" class="gate-step">
+    <p class="serif gate-welcome">Bienvenue <span id="gate-welcome-name">Zoé</span> ❤️</p>
+    <p class="gate-sub">J'ai préparé quelque chose pour toi.</p>
+    <button id="gate-enter-btn" class="flower-btn" aria-label="Entrer">
+      <svg viewBox="0 0 100 100" class="flower-svg" aria-hidden="true">
+        <g class="petals">
+          <ellipse cx="50" cy="28" rx="12" ry="20"></ellipse>
+          <ellipse cx="50" cy="72" rx="12" ry="20"></ellipse>
+          <ellipse cx="28" cy="50" rx="20" ry="12"></ellipse>
+          <ellipse cx="72" cy="50" rx="20" ry="12"></ellipse>
+          <ellipse cx="33" cy="33" rx="12" ry="18" transform="rotate(45 33 33)"></ellipse>
+          <ellipse cx="67" cy="67" rx="12" ry="18" transform="rotate(45 67 67)"></ellipse>
+          <ellipse cx="67" cy="33" rx="12" ry="18" transform="rotate(-45 67 33)"></ellipse>
+          <ellipse cx="33" cy="67" rx="12" ry="18" transform="rotate(-45 33 67)"></ellipse>
+        </g>
+        <circle cx="50" cy="50" r="11" class="flower-center"></circle>
+      </svg>
+    </button>
+    <span class="start-label">ouvrir</span>
+  </div>
+
+</section>
+
+<!-- ===================================================================
+     ECRAN 2 : LES 3 CADEAUX (page d'accueil principale)
+     =================================================================== -->
+<section id="screen-hub" class="screen">
+  <p class="eyebrow center">joyeux anniversaire</p>
+  <h1 class="serif hub-title">Trois petits cadeaux<br>pour toi.</h1>
+
+  <div class="gifts-row">
+    <button class="gift-box" id="gift-souvenirs" data-gift="souvenirs" aria-label="Ouvrir le cadeau Souvenirs">
+      <span class="gift-box-inner">
+        <span class="gift-lid"></span>
+        <span class="gift-ribbon-v"></span>
+        <span class="gift-ribbon-h"></span>
+        <span class="gift-bow">✦</span>
+      </span>
+      <span class="gift-label">Souvenirs</span>
+      <span class="gift-status" aria-hidden="true"></span>
+    </button>
+
+    <button class="gift-box" id="gift-histoire" data-gift="histoire" aria-label="Ouvrir le cadeau Notre histoire">
+      <span class="gift-box-inner">
+        <span class="gift-lid"></span>
+        <span class="gift-ribbon-v"></span>
+        <span class="gift-ribbon-h"></span>
+        <span class="gift-bow">✦</span>
+      </span>
+      <span class="gift-label">Notre histoire</span>
+      <span class="gift-status" aria-hidden="true"></span>
+    </button>
+
+    <button class="gift-box gift-locked" id="gift-surprise" data-gift="surprise" aria-label="Cadeau verrouillé">
+      <span class="gift-box-inner">
+        <span class="gift-lid"></span>
+        <span class="gift-ribbon-v"></span>
+        <span class="gift-ribbon-h"></span>
+        <span class="gift-bow">✦</span>
+        <span class="gift-padlock">🔒</span>
+      </span>
+      <span class="gift-label">Une surprise</span>
+      <span class="gift-status" aria-hidden="true"></span>
+    </button>
+  </div>
+
+  <p id="hub-hint" class="hub-hint">ouvre les deux premiers cadeaux&hellip;</p>
+</section>
+
+<!-- ===================================================================
+     ECRAN 3 : SOUVENIRS — vrai album photo
+     =================================================================== -->
+<section id="screen-souvenirs" class="screen">
+  <p class="eyebrow center">quelques souvenirs de nous</p>
+
+  <div id="album" class="album">
+    <div class="leaf" data-index="0" style="z-index:5">
+      <div class="leaf-face leaf-front">
+        <div class="leaf-photo"><img src="assets/images/photo-1.jpg" alt="Photo 1" loading="eager"></div>
+        <p class="leaf-caption">Toi, toujours aussi belle</p>
+      </div>
+      <div class="leaf-face leaf-back"></div>
+    </div>
+    <div class="leaf" data-index="1" style="z-index:4">
+      <div class="leaf-face leaf-front">
+        <div class="leaf-photo"><img src="assets/images/photo-2.jpg" alt="Photo 2" loading="lazy"></div>
+        <p class="leaf-caption">Accro à ce filtre</p>
+      </div>
+      <div class="leaf-face leaf-back"></div>
+    </div>
+    <div class="leaf" data-index="2" style="z-index:3">
+      <div class="leaf-face leaf-front">
+        <div class="leaf-photo"><img src="assets/images/photo-3.jpg" alt="Photo 3" loading="lazy"></div>
+        <p class="leaf-caption">Ce moment où Clément voyait flou</p>
+      </div>
+      <div class="leaf-face leaf-back"></div>
+    </div>
+    <div class="leaf" data-index="3" style="z-index:2">
+      <div class="leaf-face leaf-front">
+        <div class="leaf-photo"><img src="assets/images/photo-4.jpg" alt="Photo 4" loading="lazy"></div>
+        <p class="leaf-caption">La meilleure photo du meilleur couple ever<br><span>(grâce à Clément, le mec le plus drôle)</span></p>
+      </div>
+      <div class="leaf-face leaf-back"></div>
+    </div>
+    <div class="leaf leaf-last" data-index="4" style="z-index:1">
+      <div class="leaf-face leaf-front">
+        <p class="leaf-end-text serif">à suivre&hellip;</p>
+        <button class="ghost-btn album-back-btn">Retour aux cadeaux</button>
+      </div>
+      <div class="leaf-face leaf-back"></div>
+    </div>
+  </div>
+
+  <div class="album-nav">
+    <button id="album-prev" class="album-arrow" aria-label="Page précédente">‹</button>
+    <p class="hint album-hint">glisse pour tourner la page</p>
+    <button id="album-next" class="album-arrow" aria-label="Page suivante">›</button>
+  </div>
+</section>
+
+<!-- ===================================================================
+     ECRAN 4 : NOTRE HISTOIRE (compteur, questions, jeu, carte, lettre)
+     =================================================================== -->
+<section id="screen-histoire" class="screen">
+  <div id="histoire-experience">
+
+    <div class="page page-center hpage" id="hpage-counter">
+      <p class="eyebrow center">depuis le premier jour</p>
+      <p id="counter-number" class="counter-number serif">0</p>
+      <p class="counter-label">jours ensemble</p>
+      <p class="hint">touche l'écran pour continuer</p>
+    </div>
+
+    <div class="page page-center hpage" id="hpage-q1">
+      <p class="serif question-title">Tu m'aimes&nbsp;?</p>
+      <div class="question-buttons">
+        <button class="btn-oui" data-question="q1">Oui</button>
+        <button class="btn-non" data-question="q1">Non
+          <span class="non-leg non-leg-1"></span>
+          <span class="non-leg non-leg-2"></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="page hpage" id="hpage-distance">
+      <p class="eyebrow center">à distance, mais connectés</p>
+      <div id="real-map" class="real-map"></div>
+      <p class="distance-value">~105 km à vol d'oiseau</p>
+      <p class="souls-instructions">Rapprochez vos âmes 💫 <span class="souls-instructions-sub">(clique plusieurs fois sur le cœur)</span></p>
+      <div class="souls-track">
+        <div class="soul-body soul-body-left"><span class="body-label">Clément</span></div>
+        <span id="soul-line" class="soul-line"></span>
+        <div id="soul-a" class="soul soul-gold"><svg viewBox="0 0 60 70" class="soul-svg"><path d="M30 2C14 2 4 16 4 34c0 10 4 16 4 22 0 6 4 10 8 10 4 0 4-6 8-6s4 6 8 6c4 0 4-6 8-6s4 6 8 6c4 0 8-4 8-10 0-6 4-12 4-22C60 16 46 2 30 2Z"/><circle class="soul-eye" cx="22" cy="30" r="3.4"/><circle class="soul-eye" cx="38" cy="30" r="3.4"/></svg></div>
+        <div id="soul-b" class="soul soul-rose"><svg viewBox="0 0 60 70" class="soul-svg"><path d="M30 2C14 2 4 16 4 34c0 10 4 16 4 22 0 6 4 10 8 10 4 0 4-6 8-6s4 6 8 6c4 0 4-6 8-6s4 6 8 6c4 0 8-4 8-10 0-6 4-12 4-22C60 16 46 2 30 2Z"/><circle class="soul-eye" cx="22" cy="30" r="3.4"/><circle class="soul-eye" cx="38" cy="30" r="3.4"/></svg></div>
+        <div class="soul-body soul-body-right"><span class="body-label">Zoé</span></div>
+      </div>
+      <button id="souls-btn" class="souls-btn" aria-label="Rapprocher">🤍</button>
+      <p id="souls-success" class="souls-success"></p>
+      <button id="souls-continue" class="souls-continue" hidden>Continuer →</button>
+    </div>
+
+    <div class="page page-center hpage" id="hpage-q2">
+      <p class="serif question-title">Es-tu sûre de vouloir<br>continuer cette relation<br>et t'engager jusqu'à la fin&nbsp;?</p>
+      <p class="question-note">(teste le bouton Non, j'y ai passé du temps)</p>
+      <div class="question-buttons">
+        <button class="btn-oui" data-question="q2">Oui</button>
+        <button class="btn-non" data-question="q2">Non
+          <span class="non-leg non-leg-1"></span>
+          <span class="non-leg non-leg-2"></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="page page-center hpage" id="hpage-envelope">
+      <p class="eyebrow center">pour toi</p>
+      <div id="envelope" class="envelope">
+        <div class="envelope-back"></div>
+        <div class="envelope-letter-peek"></div>
+        <div class="envelope-flap"></div>
+        <div class="envelope-front-left"></div>
+        <div class="envelope-front-right"></div>
+        <div class="envelope-seal">❤</div>
+      </div>
+      <p id="envelope-hint" class="hint">touche l'enveloppe</p>
+      <div id="password-box" class="password-box" aria-hidden="true">
+        <p class="password-label">Il faut le bon mot pour l'ouvrir&hellip;</p>
+        <input id="password-input" type="text" autocomplete="off" spellcheck="false" placeholder="mot de passe" inputmode="numeric">
+        <button id="password-submit">Ouvrir</button>
+        <p id="password-error" class="password-error"></p>
+        <p class="password-hint">Indice&nbsp;: la date de naissance de la personne la plus drôle du couple 😏</p>
+      </div>
+    </div>
+
+    <div class="page page-center hpage" id="hpage-letter">
+      <div class="letter-paper">
+        <p id="letter-text" class="handwritten letter-text"></p>
+      </div>
+      <button class="ghost-btn histoire-end-btn" hidden id="histoire-end-btn">Retour aux cadeaux</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===================================================================
+     ECRAN 5 : LA SURPRISE (verrouillee jusqu'a ce que les 2 premiers
+     cadeaux soient ouverts)
+     =================================================================== -->
+<section id="screen-surprise" class="screen">
+  <div id="surprise-experience">
+
+    <div class="page page-center spage spage-dark" id="spage-touch">
+      <p class="touch-instruction">Pose ton doigt ici</p>
+      <div id="touch-zone" class="touch-zone">
+        <span id="touch-heart" class="touch-heart">❤</span>
+      </div>
+    </div>
+
+    <div class="page page-center spage" id="spage-cake">
+      <p class="eyebrow center">fais un vœu</p>
+      <div class="cake" id="cake">
+        <div class="candle"><span class="flame"></span></div>
+        <div class="candle"><span class="flame"></span></div>
+        <div class="candle"><span class="flame"></span></div>
+        <div class="cake-top"></div>
+        <div class="cake-mid"></div>
+        <div class="cake-base"></div>
+      </div>
+      <p id="cake-instruction" class="hint">souffle sur ton micro pour éteindre les bougies</p>
+      <button id="blow-fallback-btn" class="ghost-btn" hidden>Souffler</button>
+    </div>
+
+    <div class="page page-center spage" id="spage-happy">
+      <div id="confetti-layer-2" class="confetti-layer" aria-hidden="true"></div>
+      <p class="serif happy-birthday">Joyeux anniversaire ❤️</p>
+    </div>
+
+    <div class="page page-center spage spage-dark" id="spage-credits">
+      <div class="credits-photos-clip">
+        <div class="credits-photos" id="credits-photos">
+          <img src="assets/images/photo-1.jpg" alt="">
+          <img src="assets/images/photo-2.jpg" alt="">
+          <img src="assets/images/photo-3.jpg" alt="">
+          <img src="assets/images/photo-4.jpg" alt="">
+          <img src="assets/images/photo-final.jpg" alt="">
+          <img src="assets/images/photo-1.jpg" alt="" aria-hidden="true">
+          <img src="assets/images/photo-2.jpg" alt="" aria-hidden="true">
+          <img src="assets/images/photo-3.jpg" alt="" aria-hidden="true">
+          <img src="assets/images/photo-4.jpg" alt="" aria-hidden="true">
+          <img src="assets/images/photo-final.jpg" alt="" aria-hidden="true">
+        </div>
+      </div>
+      <p id="credits-line-1" class="credits-line">Merci d'avoir partagé ces moments avec moi.</p>
+      <p id="credits-line-2" class="credits-line serif">À bientôt pour les prochains ❤️</p>
+      <p class="signature handwritten">— Clément</p>
+      <button class="ghost-btn credits-replay-btn" id="credits-replay-btn">Revoir tes cadeaux</button>
+      <button id="secret-star" aria-label="étoile">✦</button>
+      <p id="secret-message" class="secret-message"></p>
+    </div>
+
+  </div>
+</section>
+
+<!-- toast discret : "cadeau ouvert" / "cadeau debloque" -->
+<div id="toast" class="toast" aria-live="polite"></div>
+
+</div><!-- /#app-frame -->
+
+<script src="script.js"></script>
+</body>
+</html>
