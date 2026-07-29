@@ -638,6 +638,12 @@ input{ font-family:inherit; }
   border:1px solid rgba(251,246,239,.28);
   display:flex; align-items:center; justify-content:center;
   animation:touchPulseRing 2.4s ease-in-out infinite;
+  /* sans ca, le navigateur interprete le moindre micro-mouvement du doigt
+     pendant l'appui maintenu comme un scroll et annule le geste avant
+     qu'il ait une chance d'aboutir */
+  touch-action:none;
+  -webkit-user-select:none;
+  user-select:none;
 }
 @keyframes touchPulseRing{
   0%,100%{ box-shadow:0 0 0 0 rgba(183,110,122,.25); }
