@@ -316,6 +316,10 @@ input{ font-family:inherit; }
   font-size:1.1rem;
   z-index:5;
 }
+/* le cadenas ne doit s'afficher que tant que le cadeau est verrouille :
+   sans cette regle, l'icone restait visible pour toujours, meme une fois
+   le cadeau reellement debloque et cliquable */
+.gift-box:not(.gift-locked) .gift-padlock{ display:none; }
 .gift-locked.gift-unlocking{ animation:unlockPulse 1.1s var(--ease); }
 @keyframes unlockPulse{
   0%{ transform:scale(1); }
