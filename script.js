@@ -92,8 +92,8 @@ function normalizeName(str){
    --------------------------------------------------------------------- */
 function preloadImages(){
   const paths = [
-    "assets/images/photo-1.jpg","assets/images/photo-2.jpg","assets/images/photo-3.jpg",
-    "assets/images/photo-4.jpg","assets/images/photo-final.jpg","assets/images/photo-bg.jpg"
+    "photo-1.jpg","photo-2.jpg","photo-3.jpg",
+    "photo-4.jpg","photo-final.jpg","photo-bg.jpg"
   ];
   paths.forEach(p => { const img = new Image(); img.src = p; });
 }
@@ -172,6 +172,7 @@ goToGateStep("lock");
 
 document.getElementById("gate-continue").addEventListener("click", () => {
   playClickSound();
+  startMusicOnce();
   goToGateStep("name");
   setTimeout(() => document.getElementById("gate-name-input").focus(), 300);
 });
@@ -596,7 +597,10 @@ function cancelTouchHold(){
 }
 touchZone.addEventListener("pointerdown", startTouchHold);
 touchZone.addEventListener("pointerup", cancelTouchHold);
-touchZone.addEventListener("pointerleave", cancelTouchHold);
+touchZone.addEventListener("pointercancel", cancelTouchHold);
+// note : on n'annule plus sur "pointerleave" — un tout petit mouvement du
+// doigt pendant l'appui (tres courant sur mobile) declenchait l'annulation
+// et donnait l'impression que rien ne se passait jamais
 
 // --- bougies : souffler dans le micro (avec repli si le micro est refuse) ---
 let candlesSetup = false;

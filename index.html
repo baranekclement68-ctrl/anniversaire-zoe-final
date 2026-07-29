@@ -14,8 +14,8 @@
      - Le prénom attendu, le mot de passe, la date de début et le texte
        de la lettre se changent tout en haut de script.js (section "A MODIFIER").
      - Les couleurs et les polices sont dans style.css, tout en haut (:root).
-     - Les photos sont dans assets/images/, la musique dans assets/music/song.mp3
-       (remplace juste ce fichier par un autre pour changer la musique).
+     - Les photos et la musique (song.mp3) sont directement à la racine
+       du projet, à côté de index.html.
      ===================================================================== -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,7 +34,7 @@
 <div id="cursor-trail" aria-hidden="true"></div>
 
 <!-- musique de fond, une seule piste, en boucle du debut a la fin -->
-<audio id="bg-music" src="assets/music/song.mp3" loop preload="auto"></audio>
+<audio id="bg-music" src="song.mp3" loop preload="auto"></audio>
 
 <!-- conteneur principal : sur PC, ce conteneur prend la forme d'un cadre
      de telephone (voir style.css, media query min-width:760px) -->
@@ -155,28 +155,28 @@
   <div id="album" class="album">
     <div class="leaf" data-index="0" style="z-index:5">
       <div class="leaf-face leaf-front">
-        <div class="leaf-photo"><img src="assets/images/photo-1.jpg" alt="Photo 1" loading="eager"></div>
+        <div class="leaf-photo"><img src="photo-1.jpg" alt="Photo 1" loading="eager"></div>
         <p class="leaf-caption">Toi, toujours aussi belle</p>
       </div>
       <div class="leaf-face leaf-back"></div>
     </div>
     <div class="leaf" data-index="1" style="z-index:4">
       <div class="leaf-face leaf-front">
-        <div class="leaf-photo"><img src="assets/images/photo-2.jpg" alt="Photo 2" loading="eager"></div>
+        <div class="leaf-photo"><img src="photo-2.jpg" alt="Photo 2" loading="eager"></div>
         <p class="leaf-caption">Accro à ce filtre</p>
       </div>
       <div class="leaf-face leaf-back"></div>
     </div>
     <div class="leaf" data-index="2" style="z-index:3">
       <div class="leaf-face leaf-front">
-        <div class="leaf-photo"><img src="assets/images/photo-3.jpg" alt="Photo 3" loading="eager"></div>
+        <div class="leaf-photo"><img src="photo-3.jpg" alt="Photo 3" loading="eager"></div>
         <p class="leaf-caption">Ce moment où Clément voyait flou</p>
       </div>
       <div class="leaf-face leaf-back"></div>
     </div>
     <div class="leaf" data-index="3" style="z-index:2">
       <div class="leaf-face leaf-front">
-        <div class="leaf-photo"><img src="assets/images/photo-4.jpg" alt="Photo 4" loading="eager"></div>
+        <div class="leaf-photo"><img src="photo-4.jpg" alt="Photo 4" loading="eager"></div>
         <p class="leaf-caption">La meilleure photo du meilleur couple ever<br><span>(grâce à Clément, le mec le plus drôle)</span></p>
       </div>
       <div class="leaf-face leaf-back"></div>
@@ -316,16 +316,16 @@
     <div class="page page-center spage spage-dark" id="spage-credits">
       <div class="credits-photos-clip">
         <div class="credits-photos" id="credits-photos">
-          <img src="assets/images/photo-1.jpg" alt="">
-          <img src="assets/images/photo-2.jpg" alt="">
-          <img src="assets/images/photo-3.jpg" alt="">
-          <img src="assets/images/photo-4.jpg" alt="">
-          <img src="assets/images/photo-final.jpg" alt="">
-          <img src="assets/images/photo-1.jpg" alt="" aria-hidden="true">
-          <img src="assets/images/photo-2.jpg" alt="" aria-hidden="true">
-          <img src="assets/images/photo-3.jpg" alt="" aria-hidden="true">
-          <img src="assets/images/photo-4.jpg" alt="" aria-hidden="true">
-          <img src="assets/images/photo-final.jpg" alt="" aria-hidden="true">
+          <img src="photo-1.jpg" alt="">
+          <img src="photo-2.jpg" alt="">
+          <img src="photo-3.jpg" alt="">
+          <img src="photo-4.jpg" alt="">
+          <img src="photo-final.jpg" alt="">
+          <img src="photo-1.jpg" alt="" aria-hidden="true">
+          <img src="photo-2.jpg" alt="" aria-hidden="true">
+          <img src="photo-3.jpg" alt="" aria-hidden="true">
+          <img src="photo-4.jpg" alt="" aria-hidden="true">
+          <img src="photo-final.jpg" alt="" aria-hidden="true">
         </div>
       </div>
       <p id="credits-line-1" class="credits-line">Merci d'avoir partagé ces moments avec moi.</p>
