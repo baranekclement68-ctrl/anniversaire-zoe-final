@@ -110,25 +110,26 @@ function startMusicOnce(){
   if(musicStarted) return;
   musicStarted = true;
   music.volume = 0.5;
-  
-  const play = () => {
-    music.play().then(() => {
-      muteBtn.hidden = false;
-    }).catch(e => {
-      console.log("Audio play blocked, waiting for interaction");
+  music.muted = false;
+  attemptMusicPlay();
+  muteBtn.hidden = false;
+}
+function attemptMusicPlay(){
+  const playPromise = music.play();
+  if(playPromise && typeof playPromise.catch === "function"){
+    playPromise.catch(() => {
+      // certains navigateurs (surtout mobile) bloquent quand meme la
+      // lecture au premier essai : des qu'un vrai geste utilisateur
+      // supplementaire arrive, on retente une seule fois
+      const retry = () => {
+        music.play().catch(() => {});
+        document.removeEventListener("click", retry);
+        document.removeEventListener("touchend", retry);
+      };
+      document.addEventListener("click", retry, { once:true });
+      document.addEventListener("touchend", retry, { once:true });
     });
-  };
-
-  play();
-
-  // Sécurité supplémentaire : relancer au premier clic n'importe où
-  const forcePlay = () => {
-    if(music.paused) play();
-    document.removeEventListener("click", forcePlay);
-    document.removeEventListener("touchstart", forcePlay);
-  };
-  document.addEventListener("click", forcePlay);
-  document.addEventListener("touchstart", forcePlay);
+  }
 }
 muteBtn.addEventListener("click", () => {
   music.muted = !music.muted;
@@ -230,36 +231,34 @@ function showToast(text){
 function markGiftOpened(name){
   if(giftState[name]) return;
   giftState[name] = true;
-  const el = giftBoxes[name];
-  if(el) el.classList.add("gift-opened");
+  giftBoxes[name].classList.add("gift-opened");
   showToast(name === "souvenirs" ? "Souvenirs ouvert ✦" : "Notre histoire ouvert ✦");
   checkUnlockSurprise();
 }
 function checkUnlockSurprise(){
-  // On vérifie les deux cadeaux
-  if(giftState.souvenirs && giftState.histoire){
-    const surprise = giftBoxes.surprise;
-    if(surprise.classList.contains("gift-locked")){
-      surprise.classList.remove("gift-locked");
-      surprise.classList.add("gift-unlocking");
-      hubHint.textContent = "ton dernier cadeau est prêt…";
-      setTimeout(() => surprise.classList.remove("gift-unlocking"), 1200);
-      playChime();
-    }
+  if(giftState.souvenirs && giftState.histoire && giftBoxes.surprise.classList.contains("gift-locked")){
+    giftBoxes.surprise.classList.remove("gift-locked");
+    giftBoxes.surprise.classList.add("gift-unlocking");
+    hubHint.textContent = "ton dernier cadeau est prêt…";
+    setTimeout(() => giftBoxes.surprise.classList.remove("gift-unlocking"), 1200);
+    playChime();
   }
 }
 
 giftBoxes.souvenirs.addEventListener("click", () => {
   playClickSound();
-  markGiftOpened("souvenirs"); // Marque comme ouvert dès le clic pour éviter les blocages
   showScreen("screen-souvenirs");
   albumGoTo(0, true);
+  // on marque le cadeau comme ouvert des qu'on y entre : Zoe ne devrait
+  // pas etre obligee d'aller jusqu'a la toute derniere page pour que ca
+  // compte, sinon la surprise ne se debloque jamais si elle quitte avant
+  markGiftOpened("souvenirs");
 });
 giftBoxes.histoire.addEventListener("click", () => {
   playClickSound();
-  markGiftOpened("histoire"); // Marque comme ouvert dès le clic pour éviter les blocages
   showScreen("screen-histoire");
   histoireGoTo(0);
+  markGiftOpened("histoire");
 });
 giftBoxes.surprise.addEventListener("click", () => {
   if(giftBoxes.surprise.classList.contains("gift-locked")){

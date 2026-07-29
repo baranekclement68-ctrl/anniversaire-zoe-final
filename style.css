@@ -356,6 +356,12 @@ input{ font-family:inherit; }
   position:absolute;
   inset:0;
   backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  /* force la carte sur sa propre couche GPU : sans ca, certains mobiles
+     (Safari/Chrome iOS) affichent le cadre de la photo mais pas l'image
+     elle-meme tant qu'aucun repaint n'est declenche */
+  transform:translateZ(0);
+  -webkit-transform:translateZ(0);
   background:#fffdf9;
   border:1px solid rgba(42,39,36,.1);
   border-radius:6px;
@@ -367,13 +373,15 @@ input{ font-family:inherit; }
   padding:.9rem;
 }
 .leaf-back{
-  transform:rotateY(180deg);
+  transform:rotateY(180deg) translateZ(0);
+  -webkit-transform:rotateY(180deg) translateZ(0);
   background:var(--paper-2);
   box-shadow:-2px 6px 18px rgba(42,39,36,.12);
 }
 .leaf-photo{
   width:100%;
   flex:1;
+  min-height:0;
   border-radius:3px;
   overflow:hidden;
   box-shadow:0 3px 10px rgba(42,39,36,.12);
@@ -383,7 +391,8 @@ input{ font-family:inherit; }
   height:100%;
   object-fit:cover;
   display:block;
-  transform: translateZ(1px); /* Force le rendu GPU pour éviter les bugs d'affichage en 3D */
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
 }
 .leaf-caption{
   font-family:var(--hand);
@@ -786,13 +795,14 @@ input{ font-family:inherit; }
   box-shadow:0 6px 16px rgba(42,39,36,.1);
   transition:opacity .3s, transform .15s;
 }
-.back-btn[hidden], .mute-btn[hidden]{
-  display: none !important;
-}
 .back-btn{ left:calc(16px + env(safe-area-inset-left)); }
 .mute-btn{ right:calc(16px + env(safe-area-inset-right)); padding:.5rem; }
 .back-btn:active, .mute-btn:active{ transform:scale(.92); }
 .mute-btn.muted #mute-wave{ opacity:.3; }
+/* correctif : l'attribut HTML "hidden" doit toujours l'emporter sur le
+   display:flex ci-dessus (sinon les boutons restent visibles ET cliquables
+   en permanence, y compris sur l'ecran de verification du prenom) */
+.back-btn[hidden], .mute-btn[hidden]{ display:none !important; }
 
 /* =====================================================================
    PETITS DETAILS : trainee du curseur + coeurs au clic
