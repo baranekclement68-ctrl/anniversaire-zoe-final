@@ -234,16 +234,6 @@ function markGiftOpened(name){
   giftState[name] = true;
   giftBoxes[name].classList.add("gift-opened");
   showToast(name === "souvenirs" ? "Souvenirs ouvert ✦" : "Notre histoire ouvert ✦");
-  checkUnlockSurprise();
-}
-function checkUnlockSurprise(){
-  if(giftState.souvenirs && giftState.histoire && giftBoxes.surprise.classList.contains("gift-locked")){
-    giftBoxes.surprise.classList.remove("gift-locked");
-    giftBoxes.surprise.classList.add("gift-unlocking");
-    hubHint.textContent = "ton dernier cadeau est prêt…";
-    setTimeout(() => giftBoxes.surprise.classList.remove("gift-unlocking"), 1200);
-    playChime();
-  }
 }
 
 giftBoxes.souvenirs.addEventListener("click", () => {
@@ -262,15 +252,6 @@ giftBoxes.histoire.addEventListener("click", () => {
   markGiftOpened("histoire");
 });
 giftBoxes.surprise.addEventListener("click", () => {
-  if(giftBoxes.surprise.classList.contains("gift-locked")){
-    playClickSound();
-    giftBoxes.surprise.animate(
-      [{ transform:"translateX(0)" },{ transform:"translateX(-6px)" },{ transform:"translateX(6px)" },{ transform:"translateX(0)" }],
-      { duration:300 }
-    );
-    hubHint.textContent = "ouvre les deux premiers cadeaux d'abord…";
-    return;
-  }
   playClickSound();
   showScreen("screen-surprise");
   surpriseGoTo(0);

@@ -300,6 +300,13 @@ input{ font-family:inherit; }
   font-size:.95rem;
   text-align:center;
 }
+.gift-sublabel{
+  display:block;
+  font-family:var(--sans);
+  font-size:.68rem;
+  color:var(--ink-soft);
+  margin-top:.15rem;
+}
 .gift-status{
   font-size:.7rem;
   color:var(--rose-deep);
